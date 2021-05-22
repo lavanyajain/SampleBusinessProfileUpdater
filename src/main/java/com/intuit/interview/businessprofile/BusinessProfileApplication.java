@@ -1,4 +1,4 @@
-package com.intuit.interview.businessprofile.businessprofile;
+package com.intuit.interview.businessprofile;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BusinessProfileApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BusinessProfileApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(BusinessProfileApplication.class, args);
+    }
 
 }
