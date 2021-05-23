@@ -26,7 +26,7 @@ public class SubscriptionServicesImpl implements SubscriptionServices {
             subscriptionStatus.setTexID(subscriptionRequest.getBusinessProfile().getTaxID());
             subscriptionStatus.setStatus(FAILURE_STATUS);
             subscriptionStatus.setMessage("Error while updating business profile one/more of the subscribed products marked this profile as invalid. Check subscription list to know more information on products");
-            return new ResponseEntity<>(subscriptionStatus, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(subscriptionStatus, HttpStatus.FORBIDDEN);
         }
     }
 }

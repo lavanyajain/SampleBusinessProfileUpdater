@@ -53,13 +53,13 @@ public class ValidationApi {
         JSONObject errorResponse = null;
         try {
             errorResponse = (JSONObject) parser.parse(message.substring(message.indexOf("{"), message.indexOf("}") + 1));
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            return message;
         }
         return String.valueOf(errorResponse.get("message"));
     }
 
-    public BatchValidationResponse validateInBatch(BatchValidationRequest batchValidationRequest) throws Exception {
+    public BatchValidationResponse validateInBatch(BatchValidationRequest batchValidationRequest) {
         int index = 0;
         BatchValidationResponse batchValidationResponse = new BatchValidationResponse();
         HashMap<String, ValidationServicesResponse> status = new HashMap<>();
@@ -80,9 +80,12 @@ public class ValidationApi {
                         try {
                             futureObject = executor.submit(new ValidationThread(batchValidationRequest.getBusinessProfile(), batchValidationRequest.getProducts().get(index))).get();
                             status.put(String.valueOf(batchValidationRequest.getProducts().get(index)), futureObject);
-                            retryCount--;
                         } catch (Exception exc) {
                             retryCount--;
+                            ValidationServicesResponse response = new ValidationServicesResponse();
+                            response.setStatus(FAILURE_STATUS);
+                            response.setMessage(getExceptionMessage(e.getMessage()));
+                            status.put(String.valueOf(batchValidationRequest.getProducts().get(index)), response);
                         }
                     }
                     ValidationServicesResponse response = new ValidationServicesResponse();
@@ -147,39 +150,34 @@ public class ValidationApi {
             } else return String.valueOf(response).matches(validationConfig.get(fieldName).toString());
         } else {
             Field[] subFields = response.getClass().getDeclaredFields();
-            for (Field subField : subFields)
+            for (Field subField : subFields) {
                 subFieldName = getFieldName(subField);
-            Method subFiledMethod = response.getClass().getMethod("get" + subFieldName.substring(0, 1).toUpperCase() + subFieldName.substring(1));
-            Object res = subFiledMethod.invoke(response);
-            return String.valueOf(res).matches(((JSONObject) validationConfig.get(fieldName)).get(subFieldName).toString());
+                Method subFiledMethod = response.getClass().getMethod("get" + subFieldName.substring(0, 1).toUpperCase() + subFieldName.substring(1));
+                Object res = subFiledMethod.invoke(response);
+                boolean subFieldMatch = String.valueOf(res).matches(((JSONObject) validationConfig.get(fieldName)).get(subFieldName).toString());
+                if (!subFieldMatch)
+                    return false;
+            }
         }
+        return true;
     }
 
     public void validate(BusinessProfile businessProfile, String product) throws Exception {
         JSONObject validationConfig = (JSONObject) readValidationConfiguration().get(product);
         Field[] fields = businessProfile.getClass().getDeclaredFields();
         String fieldName;
-
         for (Field field : fields) {
             fieldName = getFieldName(field);
             try {
                 Method getterMethod = businessProfile.getClass().getMethod("get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1));
-                try {
-                    Object response = getterMethod.invoke(businessProfile);
-                    if (!configValidation(response, fieldName, validationConfig)) {
-                        throw new InvalidDataException("Invalid data for " + fieldName + " according to field configuration it should comply the regExp provided.");
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    logger.error(e.getMessage());
-                    throw new ValidationConfigurationException(e.getMessage());
-                } catch (Exception e) {
-                    throw new Exception(e.getMessage());
+                Object response = getterMethod.invoke(businessProfile);
+                if (!configValidation(response, fieldName, validationConfig)) {
+                    throw new InvalidDataException("Invalid data for " + fieldName + " according to field configuration it should comply the regExp provided. This validation is by " + product + " QB application");
                 }
-            } catch (NoSuchMethodException e) {
-                logger.error(e.getMessage());
-                throw new ValidationConfigurationException(e.getMessage());
+            } catch (InvalidDataException e) {
+                throw new InvalidDataException(e.getMessage());
             } catch (Exception e) {
-                throw new Exception(e.getMessage());
+                throw new ValidationConfigurationException("Error in validation configuration unable to setup configuration for all products. Check validationData.json for more information. " + e.getMessage());
             }
         }
     }

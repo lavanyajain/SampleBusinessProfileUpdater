@@ -3,7 +3,6 @@ package com.intuit.interview.businessprofile.services;
 import com.intuit.interview.businessprofile.api.ValidationApi;
 import com.intuit.interview.businessprofile.exception.InvalidDataException;
 import com.intuit.interview.businessprofile.exception.ValidationConfigurationException;
-import com.intuit.interview.businessprofile.exception.ValidationConfigurationNotFoundException;
 import com.intuit.interview.businessprofile.model.BatchValidationRequest;
 import com.intuit.interview.businessprofile.model.BatchValidationResponse;
 import com.intuit.interview.businessprofile.model.BusinessProfile;
@@ -32,18 +31,14 @@ public class ValidationServicesImpl implements ValidationServices {
         } catch (ValidationConfigurationException e) {
             response.setStatus(FAILURE_STATUS);
             response.setMessage("Error with validation regExp configuration. check resources/validationData.json for field configuration");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.METHOD_FAILURE);
         } catch (InvalidDataException e) {
             response.setStatus(FAILURE_STATUS);
             response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ValidationConfigurationNotFoundException e) {
+            return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (Exception exception) {
             response.setStatus(FAILURE_STATUS);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            response.setStatus(FAILURE_STATUS);
-            response.setMessage(e.getMessage());
+            response.setMessage(exception.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -56,7 +51,7 @@ public class ValidationServicesImpl implements ValidationServices {
             if (response.getStatus().equals(SUCCESS_STATUS)) {
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
             }
         } catch (Exception e) {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -8,9 +8,7 @@ import com.intuit.interview.businessprofile.services.ValidationServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import static com.intuit.interview.businessprofile.config.Configuration.*;
@@ -44,13 +42,8 @@ public class ValidationController {
         return services.validate(businessProfile, QB_TIMESHEET);
     }
 
-    @PostMapping
+    @PostMapping(produces = "application/json", consumes = "application/json")
     public ResponseEntity<BatchValidationResponse> validateInBatch(@RequestBody BatchValidationRequest batchValidationRequest) {
         return services.validateInBatch(batchValidationRequest);
-    }
-
-    @GetMapping
-    public ResponseEntity<String> getSomeThins() {
-        return new ResponseEntity<>("Lavanya", HttpStatus.OK);
     }
 }

@@ -2,17 +2,11 @@ package com.intuit.interview.businessprofile.api;
 
 import com.intuit.interview.businessprofile.exception.SubscriptionUpdateException;
 import com.intuit.interview.businessprofile.library.QueryExecutor;
-import com.intuit.interview.businessprofile.model.BatchValidationResponse;
-import com.intuit.interview.businessprofile.model.BusinessProfile;
-import com.intuit.interview.businessprofile.model.SubscriptionRequest;
-import com.intuit.interview.businessprofile.model.SubscriptionStatus;
+import com.intuit.interview.businessprofile.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,16 +27,14 @@ public class SubscriptionApi {
     @Autowired
     private QueryExecutor queryExecutor;
 
+    @Value("${business.profile.validator.validator.service.host}")
+    private String HOST_URL;
+
     private BatchValidationResponse getBatchValidationResponse(SubscriptionRequest subscriptionRequest) {
-        ResponseEntity<BatchValidationResponse> result = null;
-        try {
-            URI url = new URI("http://localhost:8080/validate");
-            RestTemplate restTemplate = new RestTemplate();
-            result = restTemplate.postForEntity(url, subscriptionRequest, BatchValidationResponse.class);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return result.getBody();
+        BatchValidationRequest batchValidationRequest = new BatchValidationRequest();
+        batchValidationRequest.setBusinessProfile(subscriptionRequest.getBusinessProfile());
+        batchValidationRequest.setProducts(subscriptionRequest.getProducts());
+        return validationApi.validateInBatch(batchValidationRequest);
     }
 
     private List<String> checkValidationStatus(BatchValidationResponse validationResponse) {
