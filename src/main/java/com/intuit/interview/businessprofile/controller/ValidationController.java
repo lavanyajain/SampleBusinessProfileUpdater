@@ -8,15 +8,15 @@ import com.intuit.interview.businessprofile.services.ValidationServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import static com.intuit.interview.businessprofile.config.Configuration.*;
 
-@Controller
+@CrossOrigin(origins = "*")
+@RestController
 @RequestMapping("/validate")
 public class ValidationController {
     private static final Logger logger = LoggerFactory.getLogger(ValidationController.class);
@@ -47,5 +47,10 @@ public class ValidationController {
     @PostMapping
     public ResponseEntity<BatchValidationResponse> validateInBatch(@RequestBody BatchValidationRequest batchValidationRequest) {
         return services.validateInBatch(batchValidationRequest);
+    }
+
+    @GetMapping
+    public ResponseEntity<String> getSomeThins() {
+        return new ResponseEntity<>("Lavanya", HttpStatus.OK);
     }
 }
