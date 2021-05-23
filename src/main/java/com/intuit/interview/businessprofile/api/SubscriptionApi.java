@@ -30,14 +30,14 @@ public class SubscriptionApi {
     @Value("${business.profile.validator.validator.service.host}")
     private String HOST_URL;
 
-    private BatchValidationResponse getBatchValidationResponse(SubscriptionRequest subscriptionRequest) {
+    public BatchValidationResponse getBatchValidationResponse(SubscriptionRequest subscriptionRequest) {
         BatchValidationRequest batchValidationRequest = new BatchValidationRequest();
         batchValidationRequest.setBusinessProfile(subscriptionRequest.getBusinessProfile());
         batchValidationRequest.setProducts(subscriptionRequest.getProducts());
         return validationApi.validateInBatch(batchValidationRequest);
     }
 
-    private List<String> checkValidationStatus(BatchValidationResponse validationResponse) {
+    public List<String> checkValidationStatus(BatchValidationResponse validationResponse) {
         List<String> successfulValidations = new ArrayList<>();
         Set<String> keys = validationResponse.getValidationResponse().keySet();
         for (String key : keys)
