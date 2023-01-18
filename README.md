@@ -1,6 +1,6 @@
-> # Quick books Business profile updater
+> # Sample Business profile updater
 
-Quick Books profile updater service does validate Business profile data before updating data to DB.
+Sample profile updater service does validate Business profile data before updating data to DB.
 This validation has to be done by all Quick book products i.e
 * Timesheet
 * Accounts
